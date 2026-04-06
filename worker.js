@@ -12,6 +12,14 @@ export default {
       });
     }
 
+    if (url.pathname === "/favicon.ico" || url.pathname === "/favicon.png") {
+      const favicon = "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABmklEQVR4nO2bQY7DIAxFnaiaRQ/QM/RKXczpZjFX6hl6gC5m01lZQhYB7AAG7LdKopD4fz6kSsMGnbje7h/O+e/Xc2tVS0izm3AF52hlSPWL1hZOqW1EtYu1Fk6pZcTpi/QWTjlrhLixtnCK1Ihd0mg08QDymtgGjCgekdRWHJuRhccoHRJFCZhNPEB5zVkDZhSPlNQumgRXImnAzL2P5DQcGrCCeCSlJTpTSsR//Ty4Tdj8ff+eah97MvgcQA+sFH1KTJsnINxZufcRqtETgBsWeh8JtXoCAGz1PoKaLz1vevaHTAt8CGgXoM1ucfwj19v94wnQLkAb8wZ0fQxy3xn0eGyaT4AboF2ANm6AdgHauAHaBWiz9/oaa0Ter+fm7wO0C9DGDQDo91XmSKBmTwBuWEpBqNUTEO5YSAHV6AmgB1ZOgX8hEiFqwIopONKUFLrKnyapDk0OgRWSkNPgc0DuhJlTUFJ7UQJmNKG0Zraw0SdGbmex54CR0yCpTTQJjmiCtCZfNlerELMLJylml85SzC6ePmLU5fP/2JmedN7q5LgAAAAASUVORK5CYII=";
+      const bytes = Uint8Array.from(atob(favicon), c => c.charCodeAt(0));
+      return new Response(bytes, {
+        headers: { "Content-Type": "image/png", "Cache-Control": "public, max-age=86400" },
+      });
+    }
+
     if (url.pathname === "/api/audit" && request.method === "POST") {
       const body = await request.json();
       const orgName = (body.orgName || "").trim().toLowerCase();
@@ -69,6 +77,7 @@ function getHTML() {
     '<meta charset="UTF-8">',
     '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">',
     '<title>Fundri - AI-Powered NGO Fundability Intelligence</title>',
+    '<link rel="icon" type="image/png" href="/favicon.png">',
     '<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">',
     '<style>',
     '* { box-sizing: border-box; margin: 0; padding: 0; }',
@@ -98,7 +107,10 @@ function getHTML() {
     '.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }',
     '.submit-btn { width: 100%; background: #10b981; color: #0a1628; border: none; border-radius: 10px; padding: 14px 24px; font-family: Syne, sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 0.5rem; -webkit-appearance: none; }',
     '.submit-btn:disabled { background: #1e3a2e; color: #3a6b55; cursor: not-allowed; }',
-    '.disclaimer { text-align: center; font-size: 0.75rem; color: #4a5a7a; padding: 0 1rem 1rem; }',
+    '.disclaimer { text-align: center; font-size: 0.75rem; color: #4a5a7a; padding: 0 1rem 0.5rem; }',
+    '.footer-contact { text-align: center; font-size: 0.8rem; color: #4a5a7a; padding: 0 1rem 2rem; margin-top: 0.25rem; }',
+    '.footer-contact a { color: #10b981; text-decoration: none; }',
+    '.footer-contact a:hover { text-decoration: underline; }',
     '.result-section { display: none; max-width: 620px; margin: 0 auto; padding: 0 1.5rem 3rem; width: 100%; }',
     '.result-header { background: linear-gradient(135deg, #0f2a1a, #0f1e3a); border: 1px solid rgba(16,185,129,0.2); border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; text-align: center; }',
     '.score-ring { width: 90px; height: 90px; border-radius: 50%; background: conic-gradient(#10b981 0%, #10b981 var(--score-pct), #1a2f4a var(--score-pct), #1a2f4a 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; position: relative; }',
@@ -199,6 +211,7 @@ function getHTML() {
     '<button class="submit-btn" onclick="runAudit()">Run my free fundability audit &#8594;</button>',
     '<div class="error-msg" id="errorMsg"></div>',
     '<p class="disclaimer" style="margin-top: 1rem;">Your data is used only to generate your audit. It is not stored or shared.</p>',
+    '<p class="footer-contact">Get in touch &mdash; <a href="mailto:hello@getfundri.com">hello@getfundri.com</a></p>',
     '</div>',
     '<div class="result-section" id="resultSection">',
     '<div id="loadingState" class="loading-state result-card">',
@@ -217,6 +230,7 @@ function getHTML() {
     '<div class="result-card"><h3>Recommended funders to target</h3><div class="result-content" id="fundersText"></div></div>',
     '<div class="result-card"><h3>Quick wins - do these this week</h3><div class="result-content" id="quickWinsText"></div></div>',
     '<button class="reset-btn" onclick="resetForm()">&#8592; Run another audit</button>',
+    '<p class="footer-contact" style="margin-top: 1.5rem;">Get in touch &mdash; <a href="mailto:hello@getfundri.com">hello@getfundri.com</a></p>',
     '</div>',
     '</div>',
     '<script>',
