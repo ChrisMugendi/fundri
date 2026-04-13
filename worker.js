@@ -27,10 +27,7 @@ export default {
       const existing = await env.FUNDRI_KV.get("org:" + orgName);
       if (existing) {
         return new Response(JSON.stringify({ error: "already_submitted" }), {
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-          },
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
         });
       }
 
@@ -52,10 +49,22 @@ export default {
       await env.FUNDRI_KV.put("org:" + orgName, "1");
 
       return new Response(JSON.stringify(data), {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      });
+    }
+
+    if (url.pathname === "/api/feedback" && request.method === "POST") {
+      const body = await request.json();
+      const key = "feedback:" + Date.now() + ":" + Math.random().toString(36).slice(2);
+      await env.FUNDRI_KV.put(key, JSON.stringify({
+        rating: body.rating || "",
+        comment: body.comment || "",
+        email: body.email || "",
+        org: body.org || "",
+        timestamp: new Date().toISOString(),
+      }));
+      return new Response(JSON.stringify({ ok: true }), {
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
       });
     }
 
@@ -100,8 +109,8 @@ function getHTML() {
     '.field-group { margin-bottom: 1.25rem; }',
     '.field-group:last-child { margin-bottom: 0; }',
     'label { display: block; font-size: 0.8rem; font-weight: 500; color: #8a9bbf; margin-bottom: 6px; letter-spacing: 0.03em; text-transform: uppercase; }',
-    'input[type=text], select, textarea { width: 100%; background: #0a1628; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; color: #e8edf5; font-family: DM Sans, sans-serif; transition: border-color 0.2s; outline: none; -webkit-appearance: none; }',
-    'input[type=text]:focus, select:focus, textarea:focus { border-color: rgba(16,185,129,0.5); }',
+    'input[type=text], input[type=email], select, textarea { width: 100%; background: #0a1628; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; color: #e8edf5; font-family: DM Sans, sans-serif; transition: border-color 0.2s; outline: none; -webkit-appearance: none; }',
+    'input[type=text]:focus, input[type=email]:focus, select:focus, textarea:focus { border-color: rgba(16,185,129,0.5); }',
     'select option { background: #0f1e3a; color: #e8edf5; }',
     'textarea { resize: vertical; min-height: 80px; line-height: 1.5; }',
     '.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }',
@@ -110,7 +119,6 @@ function getHTML() {
     '.disclaimer { text-align: center; font-size: 0.75rem; color: #4a5a7a; padding: 0 1rem 0.5rem; }',
     '.footer-contact { text-align: center; font-size: 0.8rem; color: #4a5a7a; padding: 0 1rem 2rem; margin-top: 0.25rem; }',
     '.footer-contact a { color: #10b981; text-decoration: none; }',
-    '.footer-contact a:hover { text-decoration: underline; }',
     '.result-section { display: none; max-width: 620px; margin: 0 auto; padding: 0 1.5rem 3rem; width: 100%; }',
     '.result-header { background: linear-gradient(135deg, #0f2a1a, #0f1e3a); border: 1px solid rgba(16,185,129,0.2); border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; text-align: center; }',
     '.score-ring { width: 90px; height: 90px; border-radius: 50%; background: conic-gradient(#10b981 0%, #10b981 var(--score-pct), #1a2f4a var(--score-pct), #1a2f4a 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; position: relative; }',
@@ -129,7 +137,16 @@ function getHTML() {
     '.loading-title { font-family: Syne, sans-serif; font-size: 1rem; color: #c8d4e8; margin-bottom: 0.5rem; line-height: 1.4; }',
     '.reset-btn { width: 100%; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; color: #6b7fa3; font-family: DM Sans, sans-serif; font-size: 0.85rem; cursor: pointer; margin-top: 0.5rem; }',
     '.error-msg { background: rgba(226,75,74,0.1); border: 1px solid rgba(226,75,74,0.2); border-radius: 8px; padding: 12px 16px; color: #f09595; font-size: 0.85rem; margin-top: 0.75rem; display: none; }',
-    '@media (max-width: 600px) { .field-row { grid-template-columns: 1fr; } .hero { padding: 2rem 1rem 1.5rem; } .form-container { padding: 1rem; } .result-section { padding: 0 1rem 2rem; } .form-card { padding: 1.25rem; } }',
+    '.feedback-card { background: #0f1e3a; border: 1px solid rgba(16,185,129,0.2); border-radius: 12px; padding: 1.5rem; margin-bottom: 0.75rem; }',
+    '.feedback-card h3 { font-family: Syne, sans-serif; font-size: 0.85rem; font-weight: 600; color: #10b981; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; }',
+    '.rating-buttons { display: flex; gap: 0.75rem; margin-bottom: 1rem; }',
+    '.rating-btn { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #0a1628; color: #8a9bbf; font-family: DM Sans, sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; text-align: center; }',
+    '.rating-btn:hover { border-color: rgba(16,185,129,0.4); color: #10b981; }',
+    '.rating-btn.selected { border-color: #10b981; background: rgba(16,185,129,0.1); color: #10b981; font-weight: 600; }',
+    '.feedback-submit { width: 100%; background: #10b981; color: #0a1628; border: none; border-radius: 8px; padding: 11px; font-family: Syne, sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-top: 0.75rem; }',
+    '.feedback-submit:disabled { background: #1e3a2e; color: #3a6b55; cursor: not-allowed; }',
+    '.feedback-thanks { text-align: center; padding: 1rem; color: #10b981; font-size: 0.9rem; display: none; }',
+    '@media (max-width: 600px) { .field-row { grid-template-columns: 1fr; } .hero { padding: 2rem 1rem 1.5rem; } .form-container { padding: 1rem; } .result-section { padding: 0 1rem 2rem; } .form-card { padding: 1.25rem; } .rating-buttons { flex-direction: column; } }',
     '</style>',
     '</head>',
     '<body>',
@@ -229,11 +246,53 @@ function getHTML() {
     '<div class="result-card"><h3>Top funding gaps identified</h3><div class="result-content" id="gapsText"></div></div>',
     '<div class="result-card"><h3>Recommended funders to target</h3><div class="result-content" id="fundersText"></div></div>',
     '<div class="result-card"><h3>Quick wins - do these this week</h3><div class="result-content" id="quickWinsText"></div></div>',
+    '<div class="feedback-card">',
+    '<h3>Was this audit useful?</h3>',
+    '<div class="rating-buttons">',
+    '<button class="rating-btn" onclick="selectRating(this, \'Yes\')">&#10003; Yes, very useful</button>',
+    '<button class="rating-btn" onclick="selectRating(this, \'Somewhat\')">&#8776; Somewhat useful</button>',
+    '<button class="rating-btn" onclick="selectRating(this, \'No\')">&#10007; Not really</button>',
+    '</div>',
+    '<div class="field-group">',
+    '<label>Your feedback (optional)</label>',
+    '<textarea id="feedbackComment" placeholder="What would make this more useful for your organization?" style="min-height: 70px;"></textarea>',
+    '</div>',
+    '<div class="field-group">',
+    '<label>Your email (optional — for follow-up)</label>',
+    '<input type="email" id="feedbackEmail" placeholder="hello@yourorg.org" />',
+    '</div>',
+    '<button class="feedback-submit" onclick="submitFeedback()" id="feedbackSubmitBtn">Send feedback</button>',
+    '<div class="feedback-thanks" id="feedbackThanks">Thank you! Your feedback helps us improve Fundri.</div>',
+    '</div>',
     '<button class="reset-btn" onclick="resetForm()">&#8592; Run another audit</button>',
     '<p class="footer-contact" style="margin-top: 1.5rem;">Get in touch &mdash; <a href="mailto:hello@getfundri.com">hello@getfundri.com</a></p>',
     '</div>',
     '</div>',
     '<script>',
+    'var selectedRating = "";',
+    'var currentOrg = "";',
+    'function selectRating(btn, rating) {',
+    '  selectedRating = rating;',
+    '  var btns = document.querySelectorAll(".rating-btn");',
+    '  btns.forEach(function(b) { b.classList.remove("selected"); });',
+    '  btn.classList.add("selected");',
+    '}',
+    'async function submitFeedback() {',
+    '  var btn = document.getElementById("feedbackSubmitBtn");',
+    '  var comment = document.getElementById("feedbackComment").value.trim();',
+    '  var email = document.getElementById("feedbackEmail").value.trim();',
+    '  btn.disabled = true;',
+    '  btn.textContent = "Sending...";',
+    '  try {',
+    '    await fetch("/api/feedback", {',
+    '      method: "POST",',
+    '      headers: { "Content-Type": "application/json" },',
+    '      body: JSON.stringify({ rating: selectedRating, comment: comment, email: email, org: currentOrg })',
+    '    });',
+    '  } catch(e) {}',
+    '  document.getElementById("feedbackThanks").style.display = "block";',
+    '  btn.style.display = "none";',
+    '}',
     'async function runAudit() {',
     '  var orgName = document.getElementById("orgName").value.trim();',
     '  var sector = document.getElementById("sector").value;',
@@ -250,6 +309,7 @@ function getHTML() {
     '    errorMsg.style.display = "block";',
     '    return;',
     '  }',
+    '  currentOrg = orgName;',
     '  var btn = document.querySelector(".submit-btn");',
     '  btn.disabled = true;',
     '  btn.textContent = "Analyzing...";',
@@ -315,6 +375,14 @@ function getHTML() {
     '  var btn = document.querySelector(".submit-btn");',
     '  btn.disabled = false;',
     '  btn.textContent = "Run my free fundability audit";',
+    '  selectedRating = "";',
+    '  document.getElementById("feedbackComment").value = "";',
+    '  document.getElementById("feedbackEmail").value = "";',
+    '  document.getElementById("feedbackThanks").style.display = "none";',
+    '  document.getElementById("feedbackSubmitBtn").style.display = "block";',
+    '  document.getElementById("feedbackSubmitBtn").disabled = false;',
+    '  document.getElementById("feedbackSubmitBtn").textContent = "Send feedback";',
+    '  document.querySelectorAll(".rating-btn").forEach(function(b) { b.classList.remove("selected"); });',
     '}',
     '<\/script>',
     '</body>',
