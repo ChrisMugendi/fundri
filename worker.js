@@ -46,7 +46,12 @@ export default {
       });
 
       const data = await response.json();
-      await env.FUNDRI_KV.put("org:" + orgName, "1");
+      await env.FUNDRI_KV.put("org:" + orgName, JSON.stringify({
+  submittedAt: new Date().toISOString(),
+  country: request.cf?.country || "unknown",
+  city: request.cf?.city || "unknown",
+  ip: request.headers.get("CF-Connecting-IP") || "unknown",
+}));
 
       return new Response(JSON.stringify(data), {
         headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
