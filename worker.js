@@ -78,24 +78,26 @@ export default {
         });
       }
 
+      const storyPrompt = "You are an impact storyteller for NGOs and civil society organizations. Based on the provided photos and context, generate three outputs.\n\n" +
+        "CONTEXT:\n" +
+        "- Organization: " + (body.org || "Not specified") + "\n" +
+        "- What happened: " + (body.what || "Not specified") + "\n" +
+        "- Audience: " + (body.audience || "Donor report") + "\n" +
+        "- Number of photos provided: " + (body.images ? body.images.length : 0) + "\n\n" +
+        "STRICT RULES:\n" +
+        "- LOCATION: Never name a country, region, or place unless it is explicitly visible in the image such as a sign, flag, or written text. If location cannot be confirmed from the image, describe the setting only, for example a hillside or a community field. Never guess or infer a location.\n" +
+        "- DESCRIPTION: Write like a journalist reporting facts. One clear, specific detail per scene. Do not stack adjectives. Do not dramatize. If you see two people planting, say two people planting. Only describe what you can actually see.\n" +
+        "- TONE: Grounded, human, and specific. Avoid development sector cliches and exaggerated language.\n\n" +
+        "Generate exactly this JSON with no markdown, no backticks, raw JSON only:\n" +
+        "{\n" +
+        "  \"story\": \"A clear 250 to 320 word impact narrative in third person. Describe only what is visible or stated in the context. One strong detail per image woven into a coherent story. End with the stated or visible outcome only.\",\n" +
+        "  \"social\": \"2 to 3 sentence social media post. Specific, human, grounded in what actually happened. One relevant hashtag at the end.\",\n" +
+        "  \"quote\": \"A pull quote of 1 to 2 sentences written as if from a community member. Simple and grounded, the way a real person speaks.\"\n" +
+        "}";
+
       content.push({
         type: "text",
-        text: `You are an expert impact storyteller for NGOs and civil society organizations in East Africa. Based on the provided photos and context, generate three outputs.
-
-CONTEXT:
-- Organization: ${body.org || "Not specified"}
-- What happened: ${body.what || "Not specified"}
-- Audience: ${body.audience || "Donor report"}
-- Number of photos provided: ${body.images ? body.images.length : 0}
-
-Generate exactly this JSON (no markdown, no backticks, raw JSON only):
-{
-  "story": "<A compelling 300-400 word impact narrative written in third person. Weave details from all provided photos together into one cohesive story. Start with the human element. Be specific about what you see. End with broader impact and forward-looking statement.>",
-  "social": "<2-3 sentence social media post. Punchy, human, specific. Include one relevant hashtag at the end.>",
-  "quote": "<A powerful pull quote of 1-2 sentences, written as if from a community member or beneficiary. Put it in quotation marks.>"
-}
-
-Be specific, human, and authentic. Avoid generic development sector jargon. Make it feel real.`,
+        text: storyPrompt,
       });
 
       const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -250,7 +252,7 @@ function getStoryHTML() {
     '<h2><span class="step-num">1</span> Upload from the field</h2>',
     '<div class="field-group">',
     '<div class="upload-area" id="uploadArea" onclick="document.getElementById(\'fileInput\').click()">',
-    '<input type="file" id="fileInput" accept="image/*" multiple capture="environment">',
+    '<input type="file" id="fileInput" accept="image/*" multiple>',
     '<span class="upload-icon">&#128247;</span>',
     '<p class="upload-text">Tap to take photos or upload from your gallery</p>',
     '<p class="upload-hint">Better context = better story</p>',
@@ -361,7 +363,7 @@ function getStoryHTML() {
     '    grid.appendChild(div);',
     '  });',
     '  if (uploadedImages.length > 0) {',
-    '    count.textContent = uploadedImages.length + " of 3 photos added" + (uploadedImages.length < 3 ? " — tap above to add more" : " — maximum reached");',
+    '    count.textContent = uploadedImages.length + " of 3 photos added" + (uploadedImages.length < 3 ? " - tap above to add more" : " - maximum reached");',
     '    area.classList.add("has-file");',
     '  } else {',
     '    count.textContent = "";',
@@ -381,7 +383,7 @@ function getStoryHTML() {
     '  var errorMsg = document.getElementById("errorMsg");',
     '  errorMsg.style.display = "none";',
     '  if (!what && uploadedImages.length === 0) {',
-    '    errorMsg.textContent = "Please upload at least one photo or describe what happened — or both.";',
+    '    errorMsg.textContent = "Please upload at least one photo or describe what happened - or both.";',
     '    errorMsg.style.display = "block"; return;',
     '  }',
     '  var btn = document.querySelector(".submit-btn");',
